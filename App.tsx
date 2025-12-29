@@ -9,6 +9,7 @@ import React, { useState, useEffect } from 'react';
  * - Delayed CTA entry (500ms fade-in, 600ms active)
  * - "Redirecting..." feedback on click
  * - 600ms post-click delay for maximum ad network compatibility
+ * - Enhanced haptic feedback on CTA click
  */
 const App: React.FC = () => {
   const [progress, setProgress] = useState(0);
@@ -50,9 +51,10 @@ const App: React.FC = () => {
     };
   }, []);
 
-  const handleHaptic = (intensity: number) => {
+  const triggerHaptic = () => {
     if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-      window.navigator.vibrate(intensity);
+      // Use a distinct "short tap" pattern: 10ms vibrate, 20ms pause, 10ms vibrate
+      window.navigator.vibrate([10, 20, 10]);
     }
   };
 
@@ -60,7 +62,7 @@ const App: React.FC = () => {
     if (!isClickable || isRedirecting) return;
     
     setIsRedirecting(true);
-    handleHaptic(15);
+    triggerHaptic(); // Enhanced haptic feedback
     
     // Final Version Redirect Logic: 600ms delay with text feedback
     setTimeout(() => {
