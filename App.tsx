@@ -1,91 +1,138 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 /**
- * App Component
+ * App Component - Final Optimized Version
  * 
- * A high-fidelity, mobile-first system verification landing page.
- * Optimized for responsiveness and high-conversion via a single direct CTA.
- * Adheres to a minimalist, developer-centric aesthetic.
+ * Features:
+ * - Immediate progress bar animation (0-100% in 400ms)
+ * - Delayed CTA entry (500ms fade-in, 600ms active)
+ * - "Redirecting..." feedback on click
+ * - 600ms post-click delay for maximum ad network compatibility
  */
 const App: React.FC = () => {
+  const [progress, setProgress] = useState(0);
+  const [showButton, setShowButton] = useState(false);
+  const [isClickable, setIsClickable] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
+  const AD_LINK = "https://www.effectivegatecpm.com/andwp6bvj?key=cf4cf2b4095128df4f93401bee0f8baa";
+
+  useEffect(() => {
+    // 1. Progress Bar Animation: 0 to 100% in 400ms
+    const startTime = Date.now();
+    const duration = 400;
+    
+    const animateProgress = () => {
+      const elapsed = Date.now() - startTime;
+      const nextProgress = Math.min(100, (elapsed / duration) * 100);
+      setProgress(nextProgress);
+      
+      if (nextProgress < 100) {
+        requestAnimationFrame(animateProgress);
+      }
+    };
+    requestAnimationFrame(animateProgress);
+
+    // 2. CTA Fade-in at 500ms
+    const timerFade = setTimeout(() => {
+      setShowButton(true);
+    }, 500);
+
+    // 3. CTA Active (clickable) at 600ms
+    const timerActive = setTimeout(() => {
+      setIsClickable(true);
+    }, 600);
+
+    return () => {
+      clearTimeout(timerFade);
+      clearTimeout(timerActive);
+    };
+  }, []);
+
   const handleHaptic = (intensity: number) => {
     if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
       window.navigator.vibrate(intensity);
     }
   };
 
-  const AD_LINK = "https://www.effectivegatecpm.com/andwp6bvj?key=cf4cf2b4095128df4f93401bee0f8baa";
+  const handleContinue = () => {
+    if (!isClickable || isRedirecting) return;
+    
+    setIsRedirecting(true);
+    handleHaptic(15);
+    
+    // Final Version Redirect Logic: 600ms delay with text feedback
+    setTimeout(() => {
+      window.location.href = AD_LINK;
+    }, 600);
+  };
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-[#FFFFFF] text-[#0F172A] select-none touch-none overflow-hidden">
-      {/* 
-        The "fixed inset-0" ensures the container takes the full visual viewport, 
-        handling mobile browser address bar quirks better than 100vh.
-      */}
-      
+    <div className="fixed inset-0 flex flex-col bg-[#FFFFFF] text-[#0F172A] select-none touch-none overflow-hidden font-sans">
       <div className="flex flex-col h-full w-full max-w-sm mx-auto px-6 py-8 sm:py-12 overflow-y-auto no-scrollbar">
-        {/* 
-          Main Content Wrapper - centered content with footer naturally positioned.
-        */}
+        
         <div className="flex-grow flex flex-col items-center justify-center">
           
-          {/* System Status Label */}
-          <div className="mb-3 text-center">
-            <span className="font-mono text-[10px] sm:text-xs tracking-[0.25em] uppercase text-[#64748B] opacity-80">
-              SYSTEM STATUS
-            </span>
-          </div>
-
           {/* Headline Section */}
           <div className="mb-6 sm:mb-8 text-center w-full">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-2 break-words">
-              Your Device Is Eligible
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-2 text-[#0F172A]">
+              Your Content Is Ready
             </h1>
             <p className="text-[#64748B] text-sm sm:text-base leading-relaxed">
-              Verification required to continue.
+              Optimized for your device. You may proceed.
             </p>
           </div>
 
-          {/* System Checklist Section */}
-          <div className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-5 sm:p-6 mb-8 shadow-sm">
-            <ul className="font-mono text-[10px] sm:text-[12px] space-y-3 sm:space-y-4">
-              <li className="flex items-start">
-                <span className="text-[#16A34A] font-bold mr-3 mt-0.5 shrink-0">[OK]</span>
-                <span className="text-[#334155] uppercase leading-tight tracking-wide">
-                  Device compatibility verified
-                </span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-[#16A34A] font-bold mr-3 mt-0.5 shrink-0">[OK]</span>
-                <span className="text-[#334155] uppercase leading-tight tracking-wide">
-                  Mobile access enabled
-                </span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-[#16A34A] font-bold mr-3 mt-0.5 shrink-0">[OK]</span>
-                <span className="text-[#334155] uppercase leading-tight tracking-wide">
-                  Secure connection established
-                </span>
-              </li>
-            </ul>
+          {/* Progress Box */}
+          <div className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-6 mb-8 shadow-sm flex flex-col items-center">
+            
+            {/* Progress Bar */}
+            <div className="w-full h-2.5 bg-[#E2E8F0] rounded-full overflow-hidden mb-4">
+              <div 
+                className="h-full bg-[#16A34A] rounded-full transition-all duration-75 ease-out" 
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            
+            {/* Progress Percentage */}
+            <div className="mb-3">
+              <span className="font-mono text-xs font-bold text-[#16A34A] tracking-wider uppercase">
+                {progress >= 100 ? '100% COMPLETE' : `${Math.floor(progress)}% OPTIMIZING`}
+              </span>
+            </div>
+
+            {/* Status Text */}
+            <div className="text-center">
+              <p className="font-mono text-[10px] sm:text-[11px] uppercase tracking-wider text-[#64748B] font-semibold">
+                {progress >= 100 ? 'OPTIMIZATION FINISHED' : 'PREPARING ASSETS...'}
+              </p>
+            </div>
           </div>
 
-          {/* Primary Call to Action - Standard <a> for best redirect compatibility */}
-          <div className="w-full">
-            <a 
-              href={AD_LINK}
-              className="block w-full py-4 sm:py-5 bg-[#2563EB] text-white font-bold rounded-xl text-base sm:text-lg text-center no-underline active:bg-[#1D4ED8] active:scale-[0.98] transition-all duration-75 shadow-md touch-manipulation outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              onPointerDown={() => handleHaptic(10)}
+          {/* Primary Call to Action */}
+          <div className="w-full transition-all duration-300" style={{ opacity: showButton ? 1 : 0 }}>
+            <button 
+              id="cta"
+              onClick={handleContinue}
+              disabled={!isClickable}
+              className={`block w-full min-h-[56px] py-4 sm:py-5 font-bold rounded-xl text-base sm:text-lg text-center transition-all duration-200 shadow-lg touch-manipulation outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                isRedirecting 
+                  ? 'bg-[#1D4ED8] text-white opacity-90 cursor-default' 
+                  : isClickable 
+                    ? 'bg-[#2563EB] text-white active:bg-[#1D4ED8] active:scale-[0.98] shadow-blue-200' 
+                    : 'bg-[#94A3B8] text-white cursor-not-allowed'
+              }`}
+              style={{ pointerEvents: isClickable ? 'auto' : 'none' }}
             >
-              Continue Verification
-            </a>
+              {isRedirecting ? 'Redirecting...' : 'Continue'}
+            </button>
           </div>
         </div>
 
         {/* Footer Section */}
         <footer className="mt-8 pb-2 w-full text-center">
-          <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-[#94A3B8] font-mono leading-relaxed max-w-[280px] mx-auto">
+          <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-[#94A3B8] font-mono leading-relaxed max-w-[280px] mx-auto opacity-70">
             Information only. Proceed at your own discretion.
           </p>
         </footer>
